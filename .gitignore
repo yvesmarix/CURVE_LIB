@@ -1,0 +1,115 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+[Bb]uild[Ll]ogs/
+*.log
+
+# Visual Studio
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Rider
+.idea/
+*.sln.iml
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+# Entity Framework
+*.edmx.diagram
+*.edmx.sql
+*.edmx.rules
+
+# DotNet
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+*.VC.VC.opendb
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Coverage
+*.coverage
+*.coveragexml
+*.testsettings
+*.runsettings
+
+# Others
+*.bak
+*.swp
+*.orig
+*.tmp
+*.temp
+*.cache
+*.config
+*.prefs
+*.class
+*.pyc
+*.jar
+*.war
+*.ear
+*.iml
+*.ipr
+*.iws
+*.dbmdl
+*.dbproj.user
+*.jfm
+
+# Local history
+.localhistory/
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# Backup files
+*.bak
+*.swp
+*.tmp
+*.temp
+*.old
+*.orig
+*.save
+
+# Logs
+*.log
+*.tlog
+*.log2
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
