@@ -16,6 +16,7 @@ public class MarketInstrument
     public InstrumentType Type { get; set; }
     public double MaturityYears { get; set; }
     public double Rate { get; set; }
+    public string DayCount { get; set; }
     public int FixedFreq { get; set; } // Fréquence des paiements fixes (ex: 1 pour annuel, 2 pour semi-annuel)
 }
 

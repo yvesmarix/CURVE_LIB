@@ -2,6 +2,22 @@
   "version": 3,
   "targets": {
     "net9.0": {
+      "ConsoleTables/2.7.0": {
+        "type": "package",
+        "dependencies": {
+          "Wcwidth": "1.0.0"
+        },
+        "compile": {
+          "lib/netstandard2.1/ConsoleTables.dll": {
+            "related": ".pdb"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/ConsoleTables.dll": {
+            "related": ".pdb"
+          }
+        }
+      },
       "CsvHelper/30.0.1": {
         "type": "package",
         "compile": {
@@ -81,10 +97,38 @@
             "rid": "win-x86"
           }
         }
+      },
+      "Wcwidth/1.0.0": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/Wcwidth.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Wcwidth.dll": {
+            "related": ".xml"
+          }
+        }
       }
     }
   },
   "libraries": {
+    "ConsoleTables/2.7.0": {
+      "sha512": "6l6Si/7lMaXYHiIERdqdEMIiTjvCF29fObjAmTahsTpjSaMBUv1TMm7qmrOHL32Le3ipFqhph5sm8WOJjZG9Og==",
+      "type": "package",
+      "path": "consoletables/2.7.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Readme.md",
+        "consoletables.2.7.0.nupkg.sha512",
+        "consoletables.nuspec",
+        "icon.png",
+        "lib/netstandard2.1/ConsoleTables.dll",
+        "lib/netstandard2.1/ConsoleTables.pdb"
+      ]
+    },
     "CsvHelper/30.0.1": {
       "sha512": "rcZtgbWR+As4G3Vpgx0AMNmShGuQLFjkHAPIIflzrfkJCx8/AOd4m96ZRmiU1Wi39qS5UVjV0P8qdgqOo5Cwyg==",
       "type": "package",
@@ -247,10 +291,26 @@
         "skiasharp.nativeassets.win32.2.88.7.nupkg.sha512",
         "skiasharp.nativeassets.win32.nuspec"
       ]
+    },
+    "Wcwidth/1.0.0": {
+      "sha512": "aekut5BeF4c1Jr2qab3aXcttcgPEfPb2ok2L8911EIzn3RnDBYnUWgx/1OVlqrSXCdwAkBpNgYWXb6b5t4cBng==",
+      "type": "package",
+      "path": "wcwidth/1.0.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net6.0/Wcwidth.dll",
+        "lib/net6.0/Wcwidth.xml",
+        "lib/netstandard2.0/Wcwidth.dll",
+        "lib/netstandard2.0/Wcwidth.xml",
+        "wcwidth.1.0.0.nupkg.sha512",
+        "wcwidth.nuspec"
+      ]
     }
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "ConsoleTables >= 2.7.0",
       "CsvHelper >= 30.0.1",
       "ScottPlot >= 5.0.18"
     ]
@@ -298,6 +358,10 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "ConsoleTables": {
+            "target": "Package",
+            "version": "[2.7.0, )"
+          },
           "CsvHelper": {
             "target": "Package",
             "version": "[30.0.1, )"

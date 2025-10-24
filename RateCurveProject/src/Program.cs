@@ -4,6 +4,7 @@ using RateCurveProject.Models;
 using RateCurveProject.Models.Interpolation;
 using RateCurveProject.Output;
 using RateCurveProject.UI;
+using ConsoleTables;
 
 namespace RateCurveProject;
 
@@ -26,7 +27,17 @@ public class Program
         // 2) Charger données
         var loader = new MarketDataLoader();
         var quotes = loader.LoadInstruments(instrumentsCsv);
-        Console.WriteLine($"Loaded {quotes.Count} instruments from: {instrumentsCsv}");
+        Console.WriteLine("Instruments chargés :");
+
+        // Créez un tableau formaté avec ConsoleTable
+        var table = new ConsoleTable("Type", "Maturité (ans)", "Taux", "DayCount", "Fréquence Fixe");
+        foreach (var quote in quotes)
+        {
+            table.AddRow(quote.Type, quote.MaturityYears, quote.Rate, quote.DayCount, quote.FixedFreq);
+        }
+
+        // Affichez le tableau dans le terminal
+        table.Write();
 
         // 3) Bootstrap
         var bootstrapper = new Bootstrapper();
