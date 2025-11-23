@@ -8,25 +8,51 @@ using ConsoleTables;
 
 namespace RateCurveProject;
 
+
 public class Program
 {
+
+    // Trouve le dossier racine du projet (celui qui contient le dossier 'src')
+    static string FindProjectRoot()
+    {
+        // Point de départ: dossier binaire (bin/Debug/netX.Y)
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        for (int i = 0; i < 10 && dir != null; i++)
+        {
+            // Cherche 'src' juste en dessous
+            if (dir.GetDirectories("src").Any())
+                return dir.FullName;
+            dir = dir.Parent;
+        }
+        // fallback: cwd
+        return Directory.GetCurrentDirectory();
+    }
+
+    static string ResolveOutputDir(string outArg, string projectRoot)
+    {
+        if (Path.IsPathRooted(outArg))
+            return outArg;
+
+        // Place les sorties à la racine du projet (pas dans bin/)
+        return Path.Combine(projectRoot, outArg);
+    }
+
+
     static void Main(string[] args)
     {
         Console.WriteLine("RateCurveProject - Construction & Lissage de Courbe");
 
         // 1) Résoudre chemins robustement
         string projectRoot = FindProjectRoot();
-        string csvArg = args.Length > 0 ? args[0] : "";
         string method = args.Length > 1 ? args[1] : "HaganWest";
         string outArg = args.Length > 2 ? args[2] : "OutputRuns";
 
-        string instrumentsCsv = ResolveCsvPath(csvArg, projectRoot);
         string outputDir = ResolveOutputDir(outArg, projectRoot);
         Directory.CreateDirectory(outputDir);
 
         // 2) Charger données
         var loader = new MarketDataLoader();
-        var quotes = loader.LoadInstruments(instrumentsCsv);
+        var quotes = loader.LoadInstruments("/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/Samples/instruments_sample.csv");
         Console.WriteLine("Instruments chargés :");
 
         // Créez un tableau formaté avec ConsoleTable
@@ -68,50 +94,5 @@ public class Program
         plotter.PlotForward(curve, "forward_plot.png");
 
         Console.WriteLine($"Done. Outputs in: {outputDir}");
-    }
-
-    // Trouve le dossier racine du projet (celui qui contient le dossier 'src')
-    static string FindProjectRoot()
-    {
-        // Point de départ: dossier binaire (bin/Debug/netX.Y)
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        for (int i = 0; i < 10 && dir != null; i++)
-        {
-            // Cherche 'src' juste en dessous
-            if (dir.GetDirectories("src").Any())
-                return dir.FullName;
-            dir = dir.Parent;
-        }
-        // fallback: cwd
-        return Directory.GetCurrentDirectory();
-    }
-
-    static string ResolveCsvPath(string csvArg, string projectRoot)
-    {
-        if (!string.IsNullOrWhiteSpace(csvArg) && File.Exists(csvArg))
-            return Path.GetFullPath(csvArg);
-
-        // Essais relatifs fréquents
-        var candidates = new[]
-        {
-            csvArg,
-            Path.Combine(projectRoot, "src", "Samples", "instruments_sample.csv"),
-            Path.Combine(projectRoot, "Samples", "instruments_sample.csv"),
-            Path.Combine(Directory.GetCurrentDirectory(), "src", "Samples", "instruments_sample.csv")
-        }.Where(s => !string.IsNullOrWhiteSpace(s));
-
-        foreach (var c in candidates)
-            if (File.Exists(c)) return c;
-
-        throw new FileNotFoundException($"CSV introuvable. Essayé: {string.Join(", ", candidates)}");
-    }
-
-    static string ResolveOutputDir(string outArg, string projectRoot)
-    {
-        if (Path.IsPathRooted(outArg))
-            return outArg;
-
-        // Place les sorties à la racine du projet (pas dans bin/)
-        return Path.Combine(projectRoot, outArg);
     }
 }
