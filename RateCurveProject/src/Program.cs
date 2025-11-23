@@ -44,7 +44,7 @@ public class Program
 
         // 1) Résoudre chemins robustement
         string projectRoot = FindProjectRoot();
-        string method = args.Length > 1 ? args[1] : "HaganWest";
+        string method = args.Length > 1 ? args[1] : "SmithWilson";
         string outArg = args.Length > 2 ? args[2] : "OutputRuns";
 
         string outputDir = ResolveOutputDir(outArg, projectRoot);
@@ -52,7 +52,7 @@ public class Program
 
         // 2) Charger données
         var loader = new MarketDataLoader();
-        var quotes = loader.LoadInstruments("/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/Samples/instruments_sample.csv");
+        var quotes = loader.LoadInstruments("/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/Samples/courbe_euro.csv");
         Console.WriteLine("Instruments chargés :");
 
         // Créez un tableau formaté avec ConsoleTable

@@ -20,6 +20,19 @@ public class MarketInstrument
     public int FixedFreq { get; set; } // Fréquence des paiements fixes (ex: 1 pour annuel, 2 pour semi-annuel)
 }
 
+public sealed class MarketInstrumentMap : ClassMap<MarketInstrument>
+{
+    public MarketInstrumentMap()
+    {
+        Map(m => m.Type).Convert(args =>
+            Enum.Parse<InstrumentType>(args.Row.GetField("Type").ToLowerInvariant(), ignoreCase: true));
+        Map(m => m.MaturityYears);
+        Map(m => m.Rate);
+        Map(m => m.DayCount);
+        Map(m => m.FixedFreq);
+    }
+}
+
 public class MarketDataLoader
 {
     public List<MarketInstrument> LoadInstruments(string csvPath)
@@ -35,6 +48,9 @@ public class MarketDataLoader
 
         using var reader = new StreamReader(csvPath);
         using var csv = new CsvReader(reader, config);
+
+        // Enregistrer le mapping personnalisé
+        csv.Context.RegisterClassMap<MarketInstrumentMap>();
 
         // Lecture directe des instruments
         var instruments = csv.GetRecords<MarketInstrument>().ToList();
