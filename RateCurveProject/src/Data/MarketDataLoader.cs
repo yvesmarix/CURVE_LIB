@@ -1,14 +1,12 @@
-using System.Globalization;
-using CsvHelper;
-using CsvHelper.Configuration;
+using ClosedXML.Excel;
 
 namespace RateCurveProject.Data;
 
 public enum InstrumentType
 {
     Deposit,
-    Swap,
-    OAT
+    SWAP,
+    BOND
 }
 
 public class MarketInstrument
@@ -16,50 +14,85 @@ public class MarketInstrument
     public InstrumentType Type { get; set; }
     public double MaturityYears { get; set; }
     public double Rate { get; set; }
-    public string DayCount { get; set; }
-    public int FixedFreq { get; set; } // Fréquence des paiements fixes (ex: 1 pour annuel, 2 pour semi-annuel)
+    public int FixedFreq { get; set; }  // déterminé automatiquement
+    public double Coupon { get; set; }  // lu depuis Excel (0 si absent)
 }
 
-public sealed class MarketInstrumentMap : ClassMap<MarketInstrument>
-{
-    public MarketInstrumentMap()
-    {
-        Map(m => m.Type).Convert(args =>
-            Enum.Parse<InstrumentType>(args.Row.GetField("Type").ToLowerInvariant(), ignoreCase: true));
-        Map(m => m.MaturityYears);
-        Map(m => m.Rate);
-        Map(m => m.DayCount);
-        Map(m => m.FixedFreq);
-    }
-}
 
 public class MarketDataLoader
 {
-    public List<MarketInstrument> LoadInstruments(string csvPath)
+    public List<MarketInstrument> LoadInstruments(string xlsxPath)
     {
-        // Configuration CSV pour gérer les délimiteurs `;` et les valeurs avec `,`
-        var config = new CsvConfiguration(new CultureInfo("fr-FR")) // Utilise fr-FR pour gérer les virgules
+        var instruments = new List<MarketInstrument>();
+
+        using var workbook = new XLWorkbook(xlsxPath);
+        var ws = workbook.Worksheet(1);
+
+        var usedRange = ws.RangeUsed();
+        var headerRow = usedRange.FirstRow();
+
+        // ░░░ Mapping dynamique header → colonne ░░░
+        var headerMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+        foreach (var cell in headerRow.Cells())
+            headerMap[cell.GetString().Trim()] = cell.Address.ColumnNumber;
+
+        bool hasCoupon = headerMap.ContainsKey("Coupon");
+        bool hasToBeSelected = headerMap.ContainsKey("DONOTSELECT");
+
+        foreach (var row in usedRange.RowsUsed().Skip(1))
         {
-            Delimiter = ";", // Délimiteur `;`
-            TrimOptions = TrimOptions.Trim,
-            IgnoreBlankLines = true,
-            PrepareHeaderForMatch = args => args.Header.Trim().ToLowerInvariant(),
-        };
+            // ░░░ 1) FILTRE : ne garder que DONOTSELECT == "NON" ░░░
+            if (hasToBeSelected)
+            {
+                string coef = row.Cell(headerMap["DONOTSELECT"]).GetString().Trim().ToUpperInvariant();
+                if (coef != "NON")
+                    continue;   // on skip la ligne
+            }
 
-        using var reader = new StreamReader(csvPath);
-        using var csv = new CsvReader(reader, config);
+            // ░░░ 2) Lecture du coupon ░░░
+            double couponVal = hasCoupon
+                ? row.Cell(headerMap["Coupon"]).GetDouble()
+                : 0.0;
 
-        // Enregistrer le mapping personnalisé
-        csv.Context.RegisterClassMap<MarketInstrumentMap>();
+            // ░░░ 3) Détection small-coupon → ZC ░░░
+            bool treatAsZeroCoupon = couponVal < 0.5;
 
-        // Lecture directe des instruments
-        var instruments = csv.GetRecords<MarketInstrument>().ToList();
+            double maturity = row.Cell(headerMap["Maturity"]).GetDouble();
+            double pricePct = row.Cell(headerMap["Ask Price"]).GetDouble();
 
-        // Tri et suppression des doublons
+            // ░░░ 4) Calcul du taux actuariel ░░░
+            double yield = BondYieldCalculator.ComputeYield(
+                couponPct: treatAsZeroCoupon ? 0.0 : couponVal,
+                maturityYears: maturity,
+                pricePct: pricePct
+            );
+
+            // ░░░ 5) Construction de l’instrument ░░░
+            var ins = new MarketInstrument
+            {
+                Type = InstrumentType.BOND,
+                MaturityYears = maturity,
+
+                Coupon = treatAsZeroCoupon ? 0.0 : couponVal,
+                Rate = yield,
+
+                FixedFreq = treatAsZeroCoupon ? 0 : 1
+            };
+
+            instruments.Add(ins);
+        }
+
+        // ░░░ 6) Nettoyage final ░░░
         return instruments
             .OrderBy(x => x.MaturityYears)
             .GroupBy(x => (x.Type, x.MaturityYears))
             .Select(g => g.Last())
             .ToList();
+    }
+
+
+    private InstrumentType ParseType(string s)
+    {
+        return Enum.Parse<InstrumentType>(s.Trim(), ignoreCase: true);
     }
 }

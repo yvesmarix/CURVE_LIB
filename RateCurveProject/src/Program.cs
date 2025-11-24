@@ -52,14 +52,21 @@ public class Program
 
         // 2) Charger données
         var loader = new MarketDataLoader();
-        var quotes = loader.LoadInstruments("/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/Samples/courbe_euro.csv");
+        var dataPath = Path.Combine(
+        projectRoot,
+        "src",
+        "Samples",
+        "data_france.xlsx"
+        );
+
+        var quotes = loader.LoadInstruments(dataPath);
         Console.WriteLine("Instruments chargés :");
 
         // Créez un tableau formaté avec ConsoleTable
-        var table = new ConsoleTable("Type", "Maturité (ans)", "Taux", "DayCount", "Fréquence Fixe");
+        var table = new ConsoleTable("Type", "Maturité (ans)", "Taux", "Fréquence Fixe", "Coupon");
         foreach (var quote in quotes)
         {
-            table.AddRow(quote.Type, quote.MaturityYears, quote.Rate, quote.DayCount, quote.FixedFreq);
+            table.AddRow(quote.Type, quote.MaturityYears, quote.Rate, quote.FixedFreq, quote.Coupon);
         }
 
         // Affichez le tableau dans le terminal
