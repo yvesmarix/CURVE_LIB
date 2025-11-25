@@ -24,7 +24,7 @@ public class Program
                 return dir.FullName;
             dir = dir.Parent;
         }
-        // fallback: cwd
+        // repli : répertoire courant (current working directory)
         return Directory.GetCurrentDirectory();
     }
 
@@ -44,7 +44,7 @@ public class Program
 
         // 1) Résoudre chemins robustement
         string projectRoot = FindProjectRoot();
-        string method = args.Length > 1 ? args[1] : "SmithWilson";
+        string method = args.Length > 1 ? args[1] : "Linear";
         string outArg = args.Length > 2 ? args[2] : "OutputRuns";
 
         string outputDir = ResolveOutputDir(outArg, projectRoot);
@@ -97,17 +97,17 @@ public class Program
 
         // 7) Visualisation
         var plotter = new CurvePlotter(outputDir);
-        // also save interactive HTML viewers next to the PNGs (hover tooltips)
+        // également : sauvegarder une page HTML interactive à côté des PNG (infobulles au survol)
         plotter.PlotCurves(curve, "curve_plot.png", title: "Zero curve", interactive: true);
         plotter.PlotForward(curve, "forward_plot.png", title: "Instantaneous forward", interactive: true);
 
-        // By default, show the native GUI viewer. Pass '--no-gui' (or 'no-gui' / '-n') to skip it.
+        // Par défaut, afficher le visualiseur GUI natif. Passez '--no-gui' (ou 'no-gui' / '-n') pour le désactiver.
         if (!args.Any(a => a == "no-gui" || a == "--no-gui" || a == "-n"))
         {
-            Console.WriteLine("Launching interactive GUI viewer for zero curve (close window to continue)...");
+            Console.WriteLine("Ouverture du visualiseur GUI interactif pour la courbe zéro (fermez la fenêtre pour continuer)...");
             plotter.ShowInteractiveWinForms(curve, title: $"Zero curve ({interp.GetType().Name})", mode: "zero");
 
-            Console.WriteLine("Launching interactive GUI viewer for instantaneous forward curve (close window to finish)...");
+            Console.WriteLine("Ouverture du visualiseur GUI interactif pour la courbe forward instantané (fermez la fenêtre pour terminer)...");
             plotter.ShowInteractiveWinForms(curve, title: $"Forward instantané ({interp.GetType().Name})", mode: "forward");
         }
 

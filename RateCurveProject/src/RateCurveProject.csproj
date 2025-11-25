@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
-    <!-- Enable WinForms APIs so we can show native interactive plot windows on Windows -->
+    <!-- Active les APIs WinForms pour permettre l'affichage de fenêtres interactives natives sous Windows -->
     <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>

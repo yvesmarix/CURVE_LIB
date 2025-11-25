@@ -46,7 +46,7 @@ public class MarketDataLoader
             {
                 string coef = row.Cell(headerMap["DONOTSELECT"]).GetString().Trim().ToUpperInvariant();
                 if (coef != "NON")
-                    continue;   // on skip la ligne
+                    continue;   // on ignore / passe cette ligne
             }
 
             // ░░░ 2) Lecture du coupon ░░░

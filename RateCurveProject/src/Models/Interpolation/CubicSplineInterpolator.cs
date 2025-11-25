@@ -1,4 +1,9 @@
-// Natural cubic spline on zero rates
+// Interpolateur par spline cubique naturel appliqué aux zéro-taux
+//
+// Principe : on construit un spline S(t) tel que sur chaque intervalle [x_i,x_{i+1}]
+// S est un polynôme cubique continu, avec des dérivées premières et secondes continues
+// sur l'ensemble. Ce code suit la construction classique (système tridiagonal) pour
+// obtenir les coefficients a,b,c,d qui définissent chaque polynôme local.
 namespace RateCurveProject.Models.Interpolation;
 
 using RateCurveProject.Models;
@@ -12,6 +17,10 @@ public class CubicSplineInterpolator : IInterpolator
     private double[] c = Array.Empty<double>();
     private double[] d = Array.Empty<double>();
 
+    /// <summary>
+    /// Calibre l'interpolateur à partir d'une liste de points (T, ZeroRate) triés
+    /// (ou non — la méthode conserve l'ordre d'entrée pour construire les noeuds).
+    /// </summary>
     public void Build(IReadOnlyList<CurvePoint> points)
     {
         x = points.Select(p => p.T).ToArray();
@@ -50,6 +59,11 @@ public class CubicSplineInterpolator : IInterpolator
         }
     }
 
+    /// <summary>
+    /// Évalue le zéro-taux interpolé à la maturité t en utilisant le spline construit.
+    /// - Si t en dehors des bornes on renvoie respectivement la première ou dernière valeur.
+    /// - Dans l'intervalle, on récupère l'indice de segment puis on calcule le polynôme cubique.
+    /// </summary>
     public double Eval(double t)
     {
         if (t<=x[0]) return y[0];

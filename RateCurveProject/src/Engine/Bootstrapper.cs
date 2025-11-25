@@ -59,7 +59,7 @@ public class Bootstrapper
                 }
             }
 
-            // Fallback (ne devrait pas arriver)
+            // Cas de repli (ne devrait pas arriver)
             return Math.Exp(-ordered.Last().ZeroRate * t);
         }
 
@@ -201,7 +201,7 @@ public class Bootstrapper
                     for (int k = 1; k <= n - 1; k++)
                     {
                         double t = k * dt;
-                        double df = DfInterp(t, y);   // fallback rate = yield
+                        double df = DfInterp(t, y);   // taux de repli = yield
                         pvCoupons += c * dt * df;
                     }
 

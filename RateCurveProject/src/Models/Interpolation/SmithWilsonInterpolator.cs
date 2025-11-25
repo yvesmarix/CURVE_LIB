@@ -30,12 +30,12 @@ namespace RateCurveProject.Models.Interpolation
         private double[] xi = Array.Empty<double>();
 
         // Paramètres globaux
-        private readonly double ufr;     // ultimate forward rate (continu)
+        private readonly double ufr;     // taux forward ultime (continu)
         private readonly double lambda;  // vitesse de convergence (alpha)
 
         /// <summary>
         /// Constructeur.
-        /// ufr    : ultimate forward rate (en taux continu, ex: 0.032 pour 3.2%)
+        /// ufr    : taux forward ultime (en taux continus, ex: 0.032 pour 3.2%)
         /// lambda : vitesse de reversion vers l'UFR (souvent autour de 0.1)
         /// </summary>
         public SmithWilsonInterpolator(double ultimateForwardRate, double lambda)

@@ -14,8 +14,9 @@ public class CurvePlotter
     public CurvePlotter(string dir) { _dir = dir; }
 
     /// <summary>
-    /// Save a nicely styled PNG showing the zero curve and discount factors.
-    /// Pass `title` to include a human-friendly curve name in the plot.
+    /// Enregistre un PNG soigné affichant la courbe zéro-taux et les facteurs d'actualisation.
+    /// Le paramètre `title` permet d'ajouter un nom lisible pour la courbe dans le titre du graphique.
+    /// Si `title` est null on génère un titre par défaut qui inclut le nom de l'interpolateur.
     /// </summary>
     public void PlotCurves(Curve curve, string fileName, string? title = null, double tStart = 0.0, double tEnd = 30.0, double step = 0.1, bool interactive = false)
     {
@@ -34,15 +35,16 @@ public class CurvePlotter
         var sZero = plt.Add.Scatter(xs.ToArray(), zero.ToArray());
         sZero.Label = "Taux zéro (%)";
         sZero.LineWidth = 2;
-        sZero.MarkerSize = 0; // line plot
+        sZero.MarkerSize = 0; // trace en ligne (pas de marqueurs)
 
         var sDf = plt.Add.Scatter(xs.ToArray(), df.ToArray());
-        sDf.Label = "Discount factor";
+        sDf.Label = "Facteur d'actualisation";
         sDf.LineWidth = 2;
         sDf.MarkerSize = 0;
 
-        // ScottPlot v5: propriétés (pas de méthodes)
-        // Append interpolator name if provided by the Curve object, so titles clearly show which method was used.
+        // ScottPlot v5: configuration via propriétés (API moderne)
+        // Ajoute le nom de l'interpolateur (si présent) pour rendre évident
+        // quelle méthode d'interpolation a été utilisée dans le titre du graphique.
         var interpName = curve.InterpolatorName ?? string.Empty;
         if (!string.IsNullOrEmpty(title)) title = $"{title} ({interpName})";
         else title = $"Courbe de taux & DF ({interpName})";
@@ -53,16 +55,17 @@ public class CurvePlotter
         plt.ShowLegend();
 
         string path = Path.Combine(_dir, fileName);
-        // Save a high-quality PNG and also an SVG for better scaling when inspecting plots
+        // Enregistre un PNG haute qualité pour visualisation et partage
         plt.SavePng(path, 1000, 600);
-        // create an optional small interactive HTML viewer that can be opened in a browser.
+        // Optionnel : génère une petite page HTML interactive (PNG + JS overlay)
+        // qui peut être ouverte dans un navigateur pour obtenir des info-bulles au survol.
         if (interactive)
         {
             var pngPath = path;
             var htmlPath = Path.ChangeExtension(path, "html");
             var yMin = zero.Min();
             var yMax = zero.Max();
-            // Use percentage label for zero curve
+            // Les taux zéro sont affichés en pourcentage
             SaveInteractiveHtml(xs, zero, pngPath, htmlPath, tStart, tEnd, yMin, yMax, 1000, 600, title, "%");
         }
     }
@@ -80,7 +83,7 @@ public class CurvePlotter
         }
 
         var sFwd = plt.Add.Scatter(xs.ToArray(), fwd.ToArray());
-        sFwd.Label = "Forward instantané (%)";
+        sFwd.Label = "Forward instantané (%)"; // étiquette en français déjà
         sFwd.LineWidth = 2;
 
         var interpNameFwd = curve.InterpolatorName ?? string.Empty;
@@ -101,35 +104,37 @@ public class CurvePlotter
             var htmlPath = Path.ChangeExtension(path, "html");
             var yMin = fwd.Min();
             var yMax = fwd.Max();
-            // forward values are percentages in our plot
+                // les valeurs forward sont exprimées en pourcentage dans nos graphiques
             SaveInteractiveHtml(xs, fwd, pngPath, htmlPath, tStart, tEnd, yMin, yMax, 1000, 600, title, "%");
         }
     }
 
     /// <summary>
-    /// Opens an interactive window (WinForms) displaying the curve.
-    /// Hovering the mouse shows the nearest data point (T, value).
-    /// This method only runs on Windows with WinForms support.
+    /// Ouvre une fenêtre interactive (WinForms) affichant la courbe.
+    /// Le survol de la souris affiche le point de données le plus proche (t, valeur).
+    /// Remarque : cette méthode fonctionne uniquement sous Windows avec le support WinForms.
     /// </summary>
         /// <summary>
-        /// Produce a small interactive HTML page next to the saved PNG.
-        /// The HTML contains a copy of the exported PNG plus a lightweight JavaScript overlay
-        /// that maps the cursor position to the data coordinates and displays the nearest point values.
-        /// This works cross-platform without requiring WinForms or a GUI dependency.
+        /// Génère une page HTML interactive côté client à côté du PNG exporté.
+        /// La page contient le PNG et un petit script JavaScript qui :
+        /// - mappe la position du curseur sur les coordonnées de données,
+        /// - recherche le point le plus proche, et
+        /// - affiche une infobulle (tooltip) avec les valeurs correspondantes.
+        /// Utile quand on veut une vue interactive multiplateforme sans dépendance GUI.
         /// </summary>
         public void SaveInteractiveHtml(IEnumerable<double> xs, IEnumerable<double> ys, string pngPath, string htmlPath, double xMin, double xMax, double yMin, double yMax, int width = 1000, int height = 600, string? title = null, string? yUnit = null)
         {
                 var xsJson = System.Text.Json.JsonSerializer.Serialize(xs);
                 var ysJson = System.Text.Json.JsonSerializer.Serialize(ys);
 
-                var displayTitle = string.IsNullOrEmpty(title) ? "Interactive plot" : title.Replace("\"", "\'");
+                var displayTitle = string.IsNullOrEmpty(title) ? "Graphique interactif" : title.Replace("\"", "\'");
                 var displayUnit = string.IsNullOrEmpty(yUnit) ? "" : yUnit;
 
                 var html = $@"<!doctype html>
 <html>
 <head>
     <meta charset='utf-8'/>
-    <title>Interactive plot</title>
+    <title>Graphique interactif</title>
     <style>
         body {{ font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; display:flex; justify-content:center; }}
         .plot {{ position: relative; width: {width}px; height: {height}px; }}
@@ -165,12 +170,12 @@ public class CurvePlotter
         }}
         plot.addEventListener('mousemove', function (e) {{
             const rect = img.getBoundingClientRect();
-            const px = e.clientX - rect.left; // px inside image
+            const px = e.clientX - rect.left; // px à l'intérieur de l'image
             const py = e.clientY - rect.top;
             const plotW = rect.width; const plotH = rect.height;
-            // map to data coordinates assuming full image is plot area
+            // conversion vers coordonnées de données en supposant que toute l'image correspond à la zone de tracé
             const x = xMin + (px / plotW) * (xMax - xMin);
-            const y = yMax - (py / plotH) * (yMax - yMin); // inverted y-axis from pixels
+            const y = yMax - (py / plotH) * (yMax - yMin); // axe Y inversé par rapport aux pixels (origine en haut)
             const idx = findNearest(x);
             tt.style.display = 'block';
             tt.style.left = (px + 12) + 'px';
@@ -182,10 +187,11 @@ public class CurvePlotter
 </body>
 </html>";
 
-                // write html and copy png next to it if necessary
+                    // écrit le fichier HTML et copie le PNG à côté si nécessaire
                 var dir = Path.GetDirectoryName(htmlPath) ?? Directory.GetCurrentDirectory();
                 var pngName = Path.GetFileName(pngPath);
-                // If pngPath points elsewhere, copy PNG to same directory for the HTML to load by relative name
+                // Si pngPath est situé ailleurs, on copie le PNG dans le répertoire cible
+                // pour que la page HTML puisse le charger via un nom relatif.
                 var dstPng = Path.Combine(dir, pngName);
                 if (!string.Equals(Path.GetFullPath(dstPng), Path.GetFullPath(pngPath)))
                         File.Copy(pngPath, dstPng, overwrite: true);
@@ -194,12 +200,13 @@ public class CurvePlotter
         }
 
             /// <summary>
-            /// Show a native WinForms interactive viewer using ScottPlot.FormsPlot.
-            /// The viewer supports zoom/pan (built-in) and a native hover tooltip showing the nearest point value.
+            /// Affiche une vue native WinForms interactive en utilisant ScottPlot.FormsPlot.
+            /// Le contrôle offre zoom/pan natif et une infobulle native montrant la valeur du point le plus proche.
             /// </summary>
                 /// <summary>
-                /// Show an interactive WinForms viewer using ScottPlot.FormsPlot.
-                /// mode = "zero" (default) draws the zero curve; mode = "forward" draws instantaneous forward.
+                /// Affiche un visualiseur WinForms interactif (ScottPlot.FormsPlot).
+                /// - mode = "zero" (par défaut) dessine la courbe zéro-taux
+                /// - mode = "forward" dessine la courbe forward instantanée
                 /// </summary>
                 public void ShowInteractiveWinForms(Curve curve, string? title = null, string mode = "zero", double tStart = 0.0, double tEnd = 30.0, double step = 0.1)
             {
@@ -219,18 +226,18 @@ public class CurvePlotter
                 form.StartPosition = FormStartPosition.CenterScreen;
                 form.ClientSize = new Size(1100, 700);
 
-                // ScottPlot WinForms control: native, interactive (zoom/pan), with precise mouse->data mapping
+                // Contrôle WinForms ScottPlot : natif, interactif (zoom/pan) et conversion précise souris->données
                 var formsPlot = new ScottPlot.WinForms.FormsPlot();
                 formsPlot.Dock = DockStyle.Fill;
                 form.Controls.Add(formsPlot);
 
-                // status / tooltip label at bottom
+                // étiquette de statut / infobulle en bas
                 var status = new System.Windows.Forms.Label();
                 status.Dock = DockStyle.Bottom;
                 status.Height = 28;
                 status.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
                 status.Padding = new System.Windows.Forms.Padding(6, 0, 0, 0);
-                    status.Text = mode == "forward" ? "Hover the plot to see t / forward (%)" : "Hover the plot to see t / rate";
+                        status.Text = mode == "forward" ? "Survolez le graphique pour afficher t / forward (%)" : "Survolez le graphique pour afficher t / taux (%)";
                 form.Controls.Add(status);
 
                 var plt = formsPlot.Plot;
@@ -241,33 +248,33 @@ public class CurvePlotter
                 var s = plt.Add.Scatter(xs.ToArray(), ys.ToArray());
                 s.LineWidth = 2;
 
-                // add markers at raw points
+                // ajoute des marqueurs aux points bruts échantillonnés
                 var rawX = curve.RawPoints.Select(p => p.T).ToArray();
                 var rawY = curve.RawPoints.Select(p => p.ZeroRate * 100.0).ToArray();
                 var markers = plt.Add.Scatter(rawX, rawY);
                 markers.LineWidth = 0;
                 markers.MarkerSize = 6;
 
-                // highlight point to show nearest sample
+                // point de surbrillance utilisé pour indiquer l'échantillon le plus proche
                 var highlight = plt.Add.Scatter(new double[] { 0 }, new double[] { 0 });
                 highlight.MarkerSize = 10;
-                // leave highlight color default (avoid cross-type assignments)
+                // laisser la couleur de surbrillance par défaut (éviter les conversions de types de couleur)
 
-                // refresh the control
+                // rafraîchit le contrôle pour s'assurer que le rendu initial est appliqué
                 formsPlot.Refresh();
 
-                // handle mouse movement on the formsPlot (gives precise data coordinates)
+                // gestion du mouvement de la souris sur formsPlot (fournit des coordonnées de données précises)
                 int lastIdx = -1;
                 formsPlot.MouseMove += (snd, e) =>
                 {
                     try
                     {
-                        // get precise data coordinates using the native API
-                        // convert mouse pixel to data coordinates using Plot.GetCoordinates
+                        // obtenir des coordonnées de données précises via l'API native
+                        // conversion depuis les coordonnées pixels de la souris vers les coordonnées (x,y) du graphique
                         var coords = plt.GetCoordinates((float)e.Location.X, (float)e.Location.Y, plt.Axes.Bottom, plt.Axes.Left);
                         double mx = coords.X;
                         double my = coords.Y;
-                        // nearest index on xs
+                        // recherche de l'indice du point le plus proche dans xs
                         int idx = 0;
                         double best = double.MaxValue;
                         for (int i = 0; i < xs.Count; i++)
@@ -282,14 +289,15 @@ public class CurvePlotter
                                 ? $"t = {t:0.000}  forward = {val:0.000}% (interpolator: {curve.InterpolatorName})"
                                 : $"t = {t:0.000}  rate = {val:0.000}% (interpolator: {curve.InterpolatorName})";
 
-                                // update highlight point in the plot without recreating the whole image (fast)
+                                // met à jour uniquement le point de surbrillance dans le tracé
+                                // (évite de recréer l'image complète — opération rapide si seul l'indice change)
                                 if (idx != lastIdx)
                                 {
                                     lastIdx = idx;
-                                    // rebuild the minimal plot state with the new highlight (fast enough when index changes only)
+                                    // reconstruit un état minimal du tracé avec le nouveau point surligné
                                     plt.Clear();
                                     plt.Add.Scatter(xs.ToArray(), ys.ToArray()).LineWidth = 2;
-                                    plt.Add.Scatter(rawX, rawY).LineWidth = 0; // markers
+                                    plt.Add.Scatter(rawX, rawY).LineWidth = 0; // marqueurs
                                     highlight = plt.Add.Scatter(new double[] { t }, new double[] { val });
                                     highlight.MarkerSize = 10;
                                     formsPlot.Refresh();
@@ -297,11 +305,11 @@ public class CurvePlotter
                     }
                     catch
                     {
-                        // ignore transient errors when pointer is outside axes etc
+                        // ignorer les erreurs transitoires (curseur hors axes, etc.)
                     }
                 };
 
-                // show window
+                // afficher la fenêtre
                 Application.EnableVisualStyles();
                 Application.Run(form);
             }
