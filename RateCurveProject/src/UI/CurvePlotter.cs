@@ -18,7 +18,7 @@ public class CurvePlotter
     /// Le paramètre `title` permet d'ajouter un nom lisible pour la courbe dans le titre du graphique.
     /// Si `title` est null on génère un titre par défaut qui inclut le nom de l'interpolateur.
     /// </summary>
-    public void PlotCurves(Curve curve, string fileName, string? title = null, double tStart = 0.0, double tEnd = 30.0, double step = 0.1, bool interactive = false)
+    public void PlotCurves(Curve curve, string fileName, string? title = null, double tStart = 0.0, double tEnd = 30.0, double step = 0.1)
     {
         var plt = new ScottPlot.Plot();
 
@@ -57,18 +57,10 @@ public class CurvePlotter
         string path = Path.Combine(_dir, fileName);
         // Enregistre un PNG haute qualité pour visualisation et partage
         plt.SavePng(path, 1000, 600);
-        // Optionnel : génère une petite page HTML interactive (PNG + JS overlay)
-        // qui peut être ouverte dans un navigateur pour obtenir des info-bulles au survol.
-        if (interactive)
-        {
-            var pngPath = path;
-            var htmlPath = Path.ChangeExtension(path, "html");
-            // Génère un graphique HTML dynamique avec Chart.js
-            SaveInteractiveHtml(xs, zero, htmlPath, title, "Maturité (années)", "Taux zéro (%)");
-        }
+        // (HTML interactive export removed) — seule la sauvegarde PNG reste.
     }
 
-    public void PlotForward(Curve curve, string fileName, string? title = null, double tStart = 0.0, double tEnd = 30.0, double step = 0.1, bool interactive = false)
+    public void PlotForward(Curve curve, string fileName, string? title = null, double tStart = 0.0, double tEnd = 30.0, double step = 0.1)
     {
         var plt = new ScottPlot.Plot();
 
@@ -96,13 +88,7 @@ public class CurvePlotter
 
         string path = Path.Combine(_dir, fileName);
         plt.SavePng(path, 1000, 600);
-        if (interactive)
-        {
-            var pngPath = path;
-            var htmlPath = Path.ChangeExtension(path, "html");
-            // Génère un graphique HTML dynamique avec Chart.js
-            SaveInteractiveHtml(xs, fwd, htmlPath, title, "Maturité (années)", "Forward instantané (%)");
-        }
+        // (HTML interactive export removed) — seule la sauvegarde PNG reste.
     }
 
     /// <summary>
@@ -110,80 +96,7 @@ public class CurvePlotter
     /// Le survol de la souris affiche le point de données le plus proche (t, valeur).
     /// Remarque : cette méthode fonctionne uniquement sous Windows avec le support WinForms.
     /// </summary>
-        /// <summary>
-        /// Génère une page HTML interactive contenant un graphique dynamique basé sur Chart.js.
-        /// Le graphique est responsive, avec des info-bulles détaillées et ne dépend pas d'une image statique.
-        /// </summary>
-        public void SaveInteractiveHtml(IEnumerable<double> xs, IEnumerable<double> ys, string htmlPath, string? title = null, string? xLabel = null, string? yLabel = null)
-        {
-                var xsJson = System.Text.Json.JsonSerializer.Serialize(xs);
-                var ysJson = System.Text.Json.JsonSerializer.Serialize(ys);
-
-                var displayTitle = string.IsNullOrEmpty(title) ? "Graphique interactif" : title.Replace("\"", "\\\"");
-
-                var html = $@"<!doctype html>
-<html>
-<head>
-    <meta charset='utf-8'/>
-    <title>{displayTitle}</title>
-    <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
-    <style>
-        body {{ font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }}
-        .chart-container {{ position: relative; width: 90vw; height: 70vh; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-    </style>
-</head>
-<body>
-    <div class='chart-container'>
-        <canvas id='myChart'></canvas>
-    </div>
-    <script>
-        const ctx = document.getElementById('myChart');
-        const data = {{
-            labels: {xsJson},
-            datasets: [{{
-                label: '{yLabel ?? "Valeur"}',
-                data: {ysJson},
-                borderColor: 'rgb(75, 192, 192)',
-                backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                pointRadius: 0, // Pas de points sur la ligne
-                borderWidth: 2,
-                tension: 0.1 // Ligne légèrement lissée
-            }}]
-        }};
-
-        new Chart(ctx, {{
-            type: 'line',
-            data: data,
-            options: {{
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {{
-                    title: {{
-                        display: true,
-                        text: '{displayTitle}',
-                        font: {{ size: 18 }}
-                    }},
-                    legend: {{
-                        display: false // La légende est simple, on peut la cacher
-                    }}
-                }},
-                scales: {{
-                    x: {{
-                        type: 'linear',
-                        title: {{ display: true, text: '{xLabel ?? "Axe X"}' }}
-                    }},
-                    y: {{
-                        title: {{ display: true, text: '{yLabel ?? "Axe Y"}' }}
-                    }}
-                }}
-            }}
-        }});
-    </script>
-</body>
-</html>";
-
-                File.WriteAllText(htmlPath, html);
-        }
+        // HTML export helper removed — the project now only writes PNGs and uses native WinForms viewer.
 
             /// <summary>
             /// Affiche une vue native WinForms interactive en utilisant ScottPlot.FormsPlot.
@@ -196,17 +109,21 @@ public class CurvePlotter
                 /// </summary>
                 public void ShowInteractiveWinForms(Curve curve, string? title = null, string mode = "zero", double tStart = 0.0, double tEnd = 30.0, double step = 0.1)
             {
-                // build data
+                // build data (principale + discount-factors)
                 var xs = new List<double>();
                 var ys = new List<double>();
+                // pour le mode "forward" on n'affiche PAS les DF dans la popup
+                List<double>? dfs = mode == "forward" ? null : new List<double>();
                 for (double t = tStart; t <= tEnd; t += step)
                 {
                     xs.Add(t);
                         if (mode == "forward") ys.Add(curve.ForwardInstantaneous(t) * 100.0);
                         else ys.Add(curve.Zero(t) * 100.0);
+                    if (dfs != null)
+                        dfs.Add(curve.DF(t));
                 }
 
-                // form
+                
                 var form = new Form();
                 form.Text = title ?? ($"Curve ({curve.InterpolatorName})");
                 form.StartPosition = FormStartPosition.CenterScreen;
@@ -233,6 +150,18 @@ public class CurvePlotter
 
                 var s = plt.Add.Scatter(xs.ToArray(), ys.ToArray());
                 s.LineWidth = 2;
+                s.Axes.YAxis = plt.Axes.Left;
+
+                // Si nous sommes en mode ZERO (courbe zéro-taux), ajouter la série DF
+                if (dfs != null)
+                {
+                    var sDf = plt.Add.Scatter(xs.ToArray(), dfs.ToArray());
+                    sDf.LineWidth = 2;
+                    sDf.Color = Colors.Orange;
+                    var yAxis2 = plt.Axes.AddRightAxis();
+                    yAxis2.Label.Text = "Facteur d'actualisation";
+                    sDf.Axes.YAxis = yAxis2;
+                }
 
                 // ajoute des marqueurs aux points bruts échantillonnés
                 var rawX = curve.RawPoints.Select(p => p.T).ToArray();
@@ -278,9 +207,16 @@ public class CurvePlotter
 
                         double t = xs[idx];
                         double val = ys[idx];
-                            status.Text = mode == "forward"
-                                ? $"t = {t:0.000}  forward = {val:0.000}% (interpolator: {curve.InterpolatorName})"
-                                : $"t = {t:0.000}  rate = {val:0.000}% (interpolator: {curve.InterpolatorName})";
+                        if (mode == "forward")
+                        {
+                            status.Text = $"t = {t:0.000}  forward = {val:0.000}% (interpolator: {curve.InterpolatorName})";
+                        }
+                        else
+                        {
+                            // montrer aussi la valeur DF quand on est sur la courbe zéro
+                            var df = dfs != null ? dfs[idx] : double.NaN;
+                            status.Text = $"t = {t:0.000}  rate = {val:0.000}%  |  DF = {df:0.0000}  (interpolator: {curve.InterpolatorName})";
+                        }
 
                                 // Mettre à jour la position du point de surbrillance sans redessiner tout le graphique.
                                 // C'est beaucoup plus performant et évite le scintillement.
