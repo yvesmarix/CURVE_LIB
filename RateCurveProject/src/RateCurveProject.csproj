@@ -1,7 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <!-- Enable WinForms APIs so we can show native interactive plot windows on Windows -->
+    <UseWindowsForms>true</UseWindowsForms>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>RateCurveProject</RootNamespace>
@@ -10,6 +12,7 @@
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="ConsoleTables" Version="2.7.0" />
     <PackageReference Include="ScottPlot" Version="5.0.18" />
+    <PackageReference Include="ScottPlot.WinForms" Version="5.0.18" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 </Project>

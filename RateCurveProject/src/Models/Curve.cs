@@ -14,6 +14,12 @@ public class Curve
         _interp.Build(_points);
     }
 
+    /// <summary>
+    /// Human-friendly name of the interpolator implementation used by this curve.
+    /// Useful for titles, labels and diagnostics.
+    /// </summary>
+    public string InterpolatorName => _interp?.GetType().Name ?? "UnknownInterpolator";
+
     public double Zero(double t) => _interp.Eval(t);
     public double DF(double t) => Math.Exp(-Zero(t) * t);
     public double ForwardInstantaneous(double t, double h = 1e-4)
