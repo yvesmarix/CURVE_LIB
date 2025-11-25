@@ -1,36 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\tests\\RateCurveProject.Tests\\RateCurveProject.Tests.csproj": {}
+    "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/tests/RateCurveProject.Tests/RateCurveProject.Tests.csproj": {}
   },
   "projects": {
-    "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\src\\RateCurveProject.csproj": {
+    "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/RateCurveProject.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\src\\RateCurveProject.csproj",
+        "projectUniqueName": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/RateCurveProject.csproj",
         "projectName": "RateCurveProject",
-        "projectPath": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\src\\RateCurveProject.csproj",
-        "packagesPath": "C:\\Users\\milos\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\src\\obj\\",
+        "projectPath": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/RateCurveProject.csproj",
+        "packagesPath": "/Users/yves-mariesaliou/.nuget/packages/",
+        "outputPath": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\milos\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/yves-mariesaliou/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net9.0-windows"
+          "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows",
+          "net9.0": {
+            "targetAlias": "net9.0",
             "projectReferences": {}
           }
         },
@@ -47,8 +41,8 @@
         "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows",
+        "net9.0": {
+          "targetAlias": "net9.0",
           "dependencies": {
             "ClosedXML": {
               "target": "Package",
@@ -62,11 +56,19 @@
               "target": "Package",
               "version": "[30.0.1, )"
             },
-            "ScottPlot": {
+            "MSTest.TestAdapter": {
               "target": "Package",
-              "version": "[5.0.18, )"
+              "version": "[4.0.2, )"
             },
-            "ScottPlot.WinForms": {
+            "MSTest.TestFramework": {
+              "target": "Package",
+              "version": "[4.0.2, )"
+            },
+            "Microsoft.NET.Test.Sdk": {
+              "target": "Package",
+              "version": "[18.0.1, )"
+            },
+            "ScottPlot": {
               "target": "Package",
               "version": "[5.0.18, )"
             }
@@ -85,45 +87,36 @@
           "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
-            },
-            "Microsoft.WindowsDesktop.App.WindowsForms": {
-              "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\tests\\RateCurveProject.Tests\\RateCurveProject.Tests.csproj": {
+    "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/tests/RateCurveProject.Tests/RateCurveProject.Tests.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\tests\\RateCurveProject.Tests\\RateCurveProject.Tests.csproj",
+        "projectUniqueName": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/tests/RateCurveProject.Tests/RateCurveProject.Tests.csproj",
         "projectName": "RateCurveProject.Tests",
-        "projectPath": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\tests\\RateCurveProject.Tests\\RateCurveProject.Tests.csproj",
-        "packagesPath": "C:\\Users\\milos\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\tests\\RateCurveProject.Tests\\obj\\",
+        "projectPath": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/tests/RateCurveProject.Tests/RateCurveProject.Tests.csproj",
+        "packagesPath": "/Users/yves-mariesaliou/.nuget/packages/",
+        "outputPath": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/tests/RateCurveProject.Tests/obj/",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\milos\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "/Users/yves-mariesaliou/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net9.0-windows7.0"
+          "net9.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net9.0-windows7.0": {
-            "targetAlias": "net9.0-windows7.0",
+          "net9.0": {
+            "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\src\\RateCurveProject.csproj": {
-                "projectPath": "C:\\Users\\milos\\Desktop\\CURVE_LIB\\RateCurveProject\\src\\RateCurveProject.csproj"
+              "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/RateCurveProject.csproj": {
+                "projectPath": "/Users/yves-mariesaliou/Documents/Cours/M2 IEF 272/C#/PROJET/RateCurveProject/src/RateCurveProject.csproj"
               }
             }
           }
@@ -141,24 +134,24 @@
         "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
-        "net9.0-windows7.0": {
-          "targetAlias": "net9.0-windows7.0",
+        "net9.0": {
+          "targetAlias": "net9.0",
           "dependencies": {
             "MSTest.TestAdapter": {
               "target": "Package",
-              "version": "[3.1.1, )"
+              "version": "[3.6.3, )"
             },
             "MSTest.TestFramework": {
               "target": "Package",
-              "version": "[3.1.1, )"
+              "version": "[3.6.3, )"
             },
             "Microsoft.NET.Test.Sdk": {
               "target": "Package",
-              "version": "[17.9.0, )"
+              "version": "[17.11.1, )"
             },
             "coverlet.collector": {
               "target": "Package",
-              "version": "[3.2.0, )"
+              "version": "[6.0.2, )"
             }
           },
           "imports": [
@@ -177,7 +170,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.305/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using RateCurveProject.Models;
+using ScottPlot;
 
 namespace RateCurveProject.UI;
 

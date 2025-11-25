@@ -8,10 +8,8 @@ using ConsoleTables;
 
 namespace RateCurveProject;
 
-
 public class Program
 {
-
     // Trouve le dossier racine du projet (celui qui contient le dossier 'src')
     static string FindProjectRoot()
     {
@@ -37,15 +35,14 @@ public class Program
         return Path.Combine(projectRoot, outArg);
     }
 
-
     static void Main(string[] args)
     {
         Console.WriteLine("RateCurveProject - Construction & Lissage de Courbe");
 
         // 1) Résoudre chemins robustement
         string projectRoot = FindProjectRoot();
-        string method = args.Length > 1 ? args[1] : "SmithWilson";
-        string outArg = args.Length > 2 ? args[2] : "OutputRuns";
+        // on ne lit plus la méthode dans les args, on sort TOUS les graphes
+        string outArg = args.Length > 1 ? args[1] : "OutputRuns";
 
         string outputDir = ResolveOutputDir(outArg, projectRoot);
         Directory.CreateDirectory(outputDir);
@@ -53,10 +50,10 @@ public class Program
         // 2) Charger données
         var loader = new MarketDataLoader();
         var dataPath = Path.Combine(
-        projectRoot,
-        "src",
-        "Samples",
-        "data_france.xlsx"
+            projectRoot,
+            "src",
+            "Samples",
+            "data_france.xlsx"
         );
 
         var quotes = loader.LoadInstruments(dataPath);
@@ -72,39 +69,55 @@ public class Program
         // Affichez le tableau dans le terminal
         table.Write();
 
-        // 3) Bootstrap
+        // 3) Bootstrap (unique) de la courbe zéro à partir des instruments
         var bootstrapper = new Bootstrapper();
         var zeroPoints = bootstrapper.BuildZeroCurve(quotes);
 
-        // 4) Choix interpolateur
-        IInterpolator interp = method switch
+        // 4) Liste des méthodes d'interpolation à tester
+        var methodNames = new[] { "Linear", "CubicSpline", "HaganWest", "SmithWilson" };
+
+        foreach (var method in methodNames)
         {
-            "Linear" => new LinearInterpolator(),
-            "CubicSpline" => new CubicSplineInterpolator(),
-            "SmithWilson" => new SmithWilsonInterpolator(ultimateForwardRate: 0.025, lambda: 0.1),
-            _ => new HaganWestInterpolator(), // défaut
-        };
-        var curve = new Curve(zeroPoints, interp);
+            Console.WriteLine();
+            Console.WriteLine($"=== Méthode d'interpolation : {method} ===");
 
-        // 5) Analyse
-        var analyzer = new CurveAnalyzer(curve);
-        var metrics = analyzer.ComputeMetrics(new double[] { 0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30 });
+            // Sous-dossier par méthode : OutputRuns/Linear, OutputRuns/CubicSpline, ...
+            string methodDir = Path.Combine(outputDir, method);
+            Directory.CreateDirectory(methodDir);
 
-        // 6) Exports
-        var exporter = new ExportManager(outputDir);
-        exporter.ExportCurve(curve, "curve_points.csv", 0.25, 30.0);
-        exporter.ExportMetrics(metrics, "metrics.csv");
+            // 4a) Choix interpolateur
+            IInterpolator interp = method switch
+            {
+                "Linear" => new LinearInterpolator(),
+                "CubicSpline" => new CubicSplineInterpolator(),
+                "SmithWilson" => new SmithWilsonInterpolator(ultimateForwardRate: 0.025, lambda: 0.1),
+                _ => new HaganWestInterpolator(), // défaut → Hagan-West
+            };
 
-        // 7) Visualisation
-        var plotter = new CurvePlotter(outputDir);
-        // also save interactive HTML viewers next to the PNGs (hover tooltips)
-        plotter.PlotCurves(curve, "curve_plot.png", title: "Zero curve");
-        plotter.PlotForward(curve, "forward_plot.png", title: "Instantaneous forward");
+            var curve = new Curve(zeroPoints, interp);
 
-        // Graph interactif (navigateur)
-        plotter.ShowInteractiveBrowser(curve, "courbe_zero_interactive.html", mode: "zero");
-        plotter.ShowInteractiveBrowser(curve, "courbe_forward_interactive.html", mode: "forward");
+            // 5) Analyse (mêmes maturités de référence pour toutes les méthodes)
+            var analyzer = new CurveAnalyzer(curve);
+            var metrics = analyzer.ComputeMetrics(new double[] { 0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30 });
 
+            // 6) Exports CSV (un fichier par méthode, dans son sous-dossier)
+            var exporter = new ExportManager(methodDir);
+            exporter.ExportCurve(curve, "curve_points.csv", 0.25, 30.0);
+            exporter.ExportMetrics(metrics, "metrics.csv");
+
+            // 7) Visualisation (PNG + HTML interactif) dans le sous-dossier
+            var plotter = new CurvePlotter(methodDir);
+
+            // PNG statiques
+            plotter.PlotCurves(curve, "curve_plot.png", title: $"Zero curve - {method}");
+            plotter.PlotForward(curve, "forward_plot.png", title: $"Instantaneous forward - {method}");
+
+            // Graph interactif (navigateur) : un HTML pour la zéro, un pour les forwards
+            plotter.ShowInteractiveBrowser(curve, "courbe_zero_interactive.html", mode: "zero");
+            plotter.ShowInteractiveBrowser(curve, "courbe_forward_interactive.html", mode: "forward");
+        }
+
+        Console.WriteLine();
         Console.WriteLine($"Done. Outputs in: {outputDir}");
     }
 }

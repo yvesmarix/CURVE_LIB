@@ -16,6 +16,9 @@
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="ConsoleTables" Version="2.7.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
+    <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
     <PackageReference Include="ScottPlot" Version="5.0.18" />
     <!-- Only include WinForms package on Windows -->
     <PackageReference Include="ScottPlot.WinForms" Version="5.0.18" Condition="'$(OS)' == 'Windows_NT'" />
