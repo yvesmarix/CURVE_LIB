@@ -28,13 +28,21 @@ public class MarketDataLoader
         using var workbook = new XLWorkbook(xlsxPath);
         var ws = workbook.Worksheet(1);
 
+        // RangeUsed() peut théoriquement retourner null si la feuille est vide
         var usedRange = ws.RangeUsed();
+        if (usedRange is null)
+            return new List<MarketInstrument>();
+
         var headerRow = usedRange.FirstRow();
 
         // Crée un mapping dynamique entre les noms des en-têtes et les numéros de colonne.
         var headerMap = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
         foreach (var cell in headerRow.Cells())
-            headerMap[cell.GetString().Trim()] = cell.Address.ColumnNumber;
+        {
+            var header = cell.GetString().Trim();
+            if (!string.IsNullOrEmpty(header))
+                headerMap[header] = cell.Address.ColumnNumber;
+        }
 
         bool hasCoupon = headerMap.ContainsKey("Coupon");
         bool hasToBeSelected = headerMap.ContainsKey("DONOTSELECT");

@@ -915,9 +915,6 @@
           "ClosedXML": "0.105.0",
           "ConsoleTables": "2.7.0",
           "CsvHelper": "30.0.1",
-          "MSTest.TestAdapter": "4.0.2",
-          "MSTest.TestFramework": "4.0.2",
-          "Microsoft.NET.Test.Sdk": "18.0.1",
           "ScottPlot": "5.0.18"
         },
         "compile": {
@@ -2381,34 +2378,5 @@
         "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/9.0.305/PortableRuntimeIdentifierGraph.json"
       }
     }
-  },
-  "logs": [
-    {
-      "code": "NU1605",
-      "level": "Error",
-      "message": "Warning As Error: Detected package downgrade: Microsoft.NET.Test.Sdk from 18.0.1 to 17.11.1. Reference the package directly from the project to select a different version. \n RateCurveProject.Tests -> RateCurveProject -> Microsoft.NET.Test.Sdk (>= 18.0.1) \n RateCurveProject.Tests -> Microsoft.NET.Test.Sdk (>= 17.11.1)",
-      "libraryId": "Microsoft.NET.Test.Sdk",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1605",
-      "level": "Error",
-      "message": "Warning As Error: Detected package downgrade: MSTest.TestAdapter from 4.0.2 to 3.6.3. Reference the package directly from the project to select a different version. \n RateCurveProject.Tests -> RateCurveProject -> MSTest.TestAdapter (>= 4.0.2) \n RateCurveProject.Tests -> MSTest.TestAdapter (>= 3.6.3)",
-      "libraryId": "MSTest.TestAdapter",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    },
-    {
-      "code": "NU1605",
-      "level": "Error",
-      "message": "Warning As Error: Detected package downgrade: MSTest.TestFramework from 4.0.2 to 3.6.3. Reference the package directly from the project to select a different version. \n RateCurveProject.Tests -> RateCurveProject -> MSTest.TestFramework (>= 4.0.2) \n RateCurveProject.Tests -> MSTest.TestFramework (>= 3.6.3)",
-      "libraryId": "MSTest.TestFramework",
-      "targetGraphs": [
-        "net9.0"
-      ]
-    }
-  ]
+  }
 }

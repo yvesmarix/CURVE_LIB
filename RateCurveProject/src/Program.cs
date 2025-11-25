@@ -85,6 +85,9 @@ public class Program
             string methodDir = Path.Combine(outputDir, method);
             Directory.CreateDirectory(methodDir);
 
+            // suffix pour tous les noms de fichiers
+            string suffix = "_" + method;
+
             // 4a) Choix interpolateur
             IInterpolator interp = method switch
             {
@@ -100,21 +103,21 @@ public class Program
             var analyzer = new CurveAnalyzer(curve);
             var metrics = analyzer.ComputeMetrics(new double[] { 0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30 });
 
-            // 6) Exports CSV (un fichier par méthode, dans son sous-dossier)
+            // 6) Exports CSV (un fichier par méthode, nom avec suffixe)
             var exporter = new ExportManager(methodDir);
-            exporter.ExportCurve(curve, "curve_points.csv", 0.25, 30.0);
-            exporter.ExportMetrics(metrics, "metrics.csv");
+            exporter.ExportCurve(curve, $"curve_points{suffix}.csv", 0.25, 30.0);
+            exporter.ExportMetrics(metrics, $"metrics{suffix}.csv");
 
             // 7) Visualisation (PNG + HTML interactif) dans le sous-dossier
             var plotter = new CurvePlotter(methodDir);
 
-            // PNG statiques
-            plotter.PlotCurves(curve, "curve_plot.png", title: $"Zero curve - {method}");
-            plotter.PlotForward(curve, "forward_plot.png", title: $"Instantaneous forward - {method}");
+            // PNG statiques, nommés avec suffixe
+            plotter.PlotCurves(curve, $"curve_plot{suffix}.png", title: $"Zero curve - {method}");
+            plotter.PlotForward(curve, $"forward_plot{suffix}.png", title: $"Instantaneous forward - {method}");
 
-            // Graph interactif (navigateur) : un HTML pour la zéro, un pour les forwards
-            plotter.ShowInteractiveBrowser(curve, "courbe_zero_interactive.html", mode: "zero");
-            plotter.ShowInteractiveBrowser(curve, "courbe_forward_interactive.html", mode: "forward");
+            // Graph interactif (navigateur) : HTML avec suffixe méthode
+            plotter.ShowInteractiveBrowser(curve, $"courbe_zero_interactive{suffix}.html", mode: "zero");
+            plotter.ShowInteractiveBrowser(curve, $"courbe_forward_interactive{suffix}.html", mode: "forward");
         }
 
         Console.WriteLine();

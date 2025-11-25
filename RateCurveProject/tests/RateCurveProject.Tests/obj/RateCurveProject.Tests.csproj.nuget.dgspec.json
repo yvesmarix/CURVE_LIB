@@ -56,18 +56,6 @@
               "target": "Package",
               "version": "[30.0.1, )"
             },
-            "MSTest.TestAdapter": {
-              "target": "Package",
-              "version": "[4.0.2, )"
-            },
-            "MSTest.TestFramework": {
-              "target": "Package",
-              "version": "[4.0.2, )"
-            },
-            "Microsoft.NET.Test.Sdk": {
-              "target": "Package",
-              "version": "[18.0.1, )"
-            },
             "ScottPlot": {
               "target": "Package",
               "version": "[5.0.18, )"
