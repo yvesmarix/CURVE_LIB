@@ -63,10 +63,8 @@ public class CurvePlotter
         {
             var pngPath = path;
             var htmlPath = Path.ChangeExtension(path, "html");
-            var yMin = zero.Min();
-            var yMax = zero.Max();
-            // Les taux zéro sont affichés en pourcentage
-            SaveInteractiveHtml(xs, zero, pngPath, htmlPath, tStart, tEnd, yMin, yMax, 1000, 600, title, "%");
+            // Génère un graphique HTML dynamique avec Chart.js
+            SaveInteractiveHtml(xs, zero, htmlPath, title, "Maturité (années)", "Taux zéro (%)");
         }
     }
 
@@ -102,10 +100,8 @@ public class CurvePlotter
         {
             var pngPath = path;
             var htmlPath = Path.ChangeExtension(path, "html");
-            var yMin = fwd.Min();
-            var yMax = fwd.Max();
-                // les valeurs forward sont exprimées en pourcentage dans nos graphiques
-            SaveInteractiveHtml(xs, fwd, pngPath, htmlPath, tStart, tEnd, yMin, yMax, 1000, 600, title, "%");
+            // Génère un graphique HTML dynamique avec Chart.js
+            SaveInteractiveHtml(xs, fwd, htmlPath, title, "Maturité (années)", "Forward instantané (%)");
         }
     }
 
@@ -115,86 +111,76 @@ public class CurvePlotter
     /// Remarque : cette méthode fonctionne uniquement sous Windows avec le support WinForms.
     /// </summary>
         /// <summary>
-        /// Génère une page HTML interactive côté client à côté du PNG exporté.
-        /// La page contient le PNG et un petit script JavaScript qui :
-        /// - mappe la position du curseur sur les coordonnées de données,
-        /// - recherche le point le plus proche, et
-        /// - affiche une infobulle (tooltip) avec les valeurs correspondantes.
-        /// Utile quand on veut une vue interactive multiplateforme sans dépendance GUI.
+        /// Génère une page HTML interactive contenant un graphique dynamique basé sur Chart.js.
+        /// Le graphique est responsive, avec des info-bulles détaillées et ne dépend pas d'une image statique.
         /// </summary>
-        public void SaveInteractiveHtml(IEnumerable<double> xs, IEnumerable<double> ys, string pngPath, string htmlPath, double xMin, double xMax, double yMin, double yMax, int width = 1000, int height = 600, string? title = null, string? yUnit = null)
+        public void SaveInteractiveHtml(IEnumerable<double> xs, IEnumerable<double> ys, string htmlPath, string? title = null, string? xLabel = null, string? yLabel = null)
         {
                 var xsJson = System.Text.Json.JsonSerializer.Serialize(xs);
                 var ysJson = System.Text.Json.JsonSerializer.Serialize(ys);
 
-                var displayTitle = string.IsNullOrEmpty(title) ? "Graphique interactif" : title.Replace("\"", "\'");
-                var displayUnit = string.IsNullOrEmpty(yUnit) ? "" : yUnit;
+                var displayTitle = string.IsNullOrEmpty(title) ? "Graphique interactif" : title.Replace("\"", "\\\"");
 
                 var html = $@"<!doctype html>
 <html>
 <head>
     <meta charset='utf-8'/>
-    <title>Graphique interactif</title>
+    <title>{displayTitle}</title>
+    <script src='https://cdn.jsdelivr.net/npm/chart.js'></script>
     <style>
-        body {{ font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 0; display:flex; justify-content:center; }}
-        .plot {{ position: relative; width: {width}px; height: {height}px; }}
-        .plot img {{ width: 100%; height: 100%; display:block; }}
-        .tooltip {{ position: absolute; background: rgba(255,255,255,0.9); border: 1px solid #ccc; padding: 6px; pointer-events: none; display:none; font-size: 13px; }}
+        body {{ font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 20px; background-color: #f4f4f4; }}
+        .chart-container {{ position: relative; width: 90vw; height: 70vh; margin: auto; background-color: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
     </style>
 </head>
 <body>
-    <div style='text-align:center; margin:10px;'>
-        <strong>{displayTitle}</strong>
-    </div>
-    <div class='plot'>
-        <img src='{Path.GetFileName(pngPath)}' alt='plot'/>
-        <div id='tt' class='tooltip'></div>
+    <div class='chart-container'>
+        <canvas id='myChart'></canvas>
     </div>
     <script>
-        const xs = {xsJson};
-        const ys = {ysJson};
-        const xMin = {xMin};
-        const xMax = {xMax};
-        const yMin = {yMin};
-        const yMax = {yMax};
-        const plot = document.querySelector('.plot');
-        const img = plot.querySelector('img');
-        const tt = document.getElementById('tt');
-        function findNearest(x) {{
-            let best = 0; let bestd = Infinity;
-            for (let i = 0; i < xs.length; i++) {{
-                const d = Math.abs(xs[i] - x);
-                if (d < bestd) {{ bestd = d; best = i; }}
+        const ctx = document.getElementById('myChart');
+        const data = {{
+            labels: {xsJson},
+            datasets: [{{
+                label: '{yLabel ?? "Valeur"}',
+                data: {ysJson},
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                pointRadius: 0, // Pas de points sur la ligne
+                borderWidth: 2,
+                tension: 0.1 // Ligne légèrement lissée
+            }}]
+        }};
+
+        new Chart(ctx, {{
+            type: 'line',
+            data: data,
+            options: {{
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {{
+                    title: {{
+                        display: true,
+                        text: '{displayTitle}',
+                        font: {{ size: 18 }}
+                    }},
+                    legend: {{
+                        display: false // La légende est simple, on peut la cacher
+                    }}
+                }},
+                scales: {{
+                    x: {{
+                        type: 'linear',
+                        title: {{ display: true, text: '{xLabel ?? "Axe X"}' }}
+                    }},
+                    y: {{
+                        title: {{ display: true, text: '{yLabel ?? "Axe Y"}' }}
+                    }}
+                }}
             }}
-            return best;
-        }}
-        plot.addEventListener('mousemove', function (e) {{
-            const rect = img.getBoundingClientRect();
-            const px = e.clientX - rect.left; // px à l'intérieur de l'image
-            const py = e.clientY - rect.top;
-            const plotW = rect.width; const plotH = rect.height;
-            // conversion vers coordonnées de données en supposant que toute l'image correspond à la zone de tracé
-            const x = xMin + (px / plotW) * (xMax - xMin);
-            const y = yMax - (py / plotH) * (yMax - yMin); // axe Y inversé par rapport aux pixels (origine en haut)
-            const idx = findNearest(x);
-            tt.style.display = 'block';
-            tt.style.left = (px + 12) + 'px';
-            tt.style.top = (py + 12) + 'px';
-            tt.innerHTML = 't = ' + xs[idx].toFixed(4) + '<br/>' + ys[idx].toFixed(6) + ' {displayUnit}';
         }});
-        plot.addEventListener('mouseleave', function () {{ tt.style.display = 'none'; }});
     </script>
 </body>
 </html>";
-
-                    // écrit le fichier HTML et copie le PNG à côté si nécessaire
-                var dir = Path.GetDirectoryName(htmlPath) ?? Directory.GetCurrentDirectory();
-                var pngName = Path.GetFileName(pngPath);
-                // Si pngPath est situé ailleurs, on copie le PNG dans le répertoire cible
-                // pour que la page HTML puisse le charger via un nom relatif.
-                var dstPng = Path.Combine(dir, pngName);
-                if (!string.Equals(Path.GetFullPath(dstPng), Path.GetFullPath(pngPath)))
-                        File.Copy(pngPath, dstPng, overwrite: true);
 
                 File.WriteAllText(htmlPath, html);
         }
@@ -255,10 +241,16 @@ public class CurvePlotter
                 markers.LineWidth = 0;
                 markers.MarkerSize = 6;
 
+                // Force l'axe X à s'étirer de 0 à 30 ans pour une meilleure visualisation.
+                plt.Axes.SetLimits(left: 0, right: 30);
+
                 // point de surbrillance utilisé pour indiquer l'échantillon le plus proche
-                var highlight = plt.Add.Scatter(new double[] { 0 }, new double[] { 0 });
-                highlight.MarkerSize = 10;
-                // laisser la couleur de surbrillance par défaut (éviter les conversions de types de couleur)
+                // On utilise un 'Marker' simple, plus léger à déplacer qu'un 'Scatter'.
+                var highlight = plt.Add.Marker(0, 0);
+                highlight.IsVisible = false; // Caché au début
+                highlight.MarkerStyle.Size = 12;
+                highlight.MarkerStyle.Fill.Color = Colors.Red;
+                highlight.MarkerStyle.Outline.Color = Colors.Red;
 
                 // rafraîchit le contrôle pour s'assurer que le rendu initial est appliqué
                 formsPlot.Refresh();
@@ -269,6 +261,7 @@ public class CurvePlotter
                 {
                     try
                     {
+                        highlight.IsVisible = true;
                         // obtenir des coordonnées de données précises via l'API native
                         // conversion depuis les coordonnées pixels de la souris vers les coordonnées (x,y) du graphique
                         var coords = plt.GetCoordinates((float)e.Location.X, (float)e.Location.Y, plt.Axes.Bottom, plt.Axes.Left);
@@ -289,24 +282,26 @@ public class CurvePlotter
                                 ? $"t = {t:0.000}  forward = {val:0.000}% (interpolator: {curve.InterpolatorName})"
                                 : $"t = {t:0.000}  rate = {val:0.000}% (interpolator: {curve.InterpolatorName})";
 
-                                // met à jour uniquement le point de surbrillance dans le tracé
-                                // (évite de recréer l'image complète — opération rapide si seul l'indice change)
+                                // Mettre à jour la position du point de surbrillance sans redessiner tout le graphique.
+                                // C'est beaucoup plus performant et évite le scintillement.
                                 if (idx != lastIdx)
                                 {
                                     lastIdx = idx;
-                                    // reconstruit un état minimal du tracé avec le nouveau point surligné
-                                    plt.Clear();
-                                    plt.Add.Scatter(xs.ToArray(), ys.ToArray()).LineWidth = 2;
-                                    plt.Add.Scatter(rawX, rawY).LineWidth = 0; // marqueurs
-                                    highlight = plt.Add.Scatter(new double[] { t }, new double[] { val });
-                                    highlight.MarkerSize = 10;
+                                    // Déplacer le marqueur de surbrillance vers la nouvelle position.
+                                    highlight.Location = new ScottPlot.Coordinates(t, val);
                                     formsPlot.Refresh();
                                 }
                     }
-                    catch
+                    catch (Exception)
                     {
                         // ignorer les erreurs transitoires (curseur hors axes, etc.)
                     }
+                };
+
+                formsPlot.MouseLeave += (s, e) =>
+                {
+                    highlight.IsVisible = false;
+                    formsPlot.Refresh();
                 };
 
                 // afficher la fenêtre
