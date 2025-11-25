@@ -14,7 +14,7 @@ public class Program
 
     // Trouve le dossier racine du projet (celui qui contient le dossier 'src')
     static string FindProjectRoot()
-    { 
+    {
         // Point de départ: dossier binaire (bin/Debug/netX.Y)
         var dir = new DirectoryInfo(AppContext.BaseDirectory);
         for (int i = 0; i < 10 && dir != null; i++)
@@ -101,15 +101,9 @@ public class Program
         plotter.PlotCurves(curve, "curve_plot.png", title: "Zero curve");
         plotter.PlotForward(curve, "forward_plot.png", title: "Instantaneous forward");
 
-        // By default, show the native GUI viewer. Pass '--no-gui' (or 'no-gui' / '-n') to skip it.
-        if (!args.Any(a => a == "no-gui" || a == "--no-gui" || a == "-n"))
-        {
-            Console.WriteLine("Launching interactive GUI viewer for zero curve (close window to continue)...");
-            plotter.ShowInteractiveWinForms(curve, title: $"Zero curve ({interp.GetType().Name})", mode: "zero");
-
-            Console.WriteLine("Launching interactive GUI viewer for instantaneous forward curve (close window to finish)...");
-            plotter.ShowInteractiveWinForms(curve, title: $"Forward instantané ({interp.GetType().Name})", mode: "forward");
-        }
+        // Graph interactif (navigateur)
+        plotter.ShowInteractiveBrowser(curve, "courbe_zero_interactive.html", mode: "zero");
+        plotter.ShowInteractiveBrowser(curve, "courbe_forward_interactive.html", mode: "forward");
 
         Console.WriteLine($"Done. Outputs in: {outputDir}");
     }

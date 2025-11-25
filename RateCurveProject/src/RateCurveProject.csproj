@@ -1,18 +1,24 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <!-- Active les APIs WinForms pour permettre l'affichage de fenêtres interactives natives sous Windows -->
-    <UseWindowsForms>true</UseWindowsForms>
+    <!-- Use conditional targeting: Windows-specific features only on Windows -->
+    <TargetFramework Condition="'$(OS)' == 'Windows_NT'">net9.0-windows</TargetFramework>
+    <TargetFramework Condition="'$(OS)' != 'Windows_NT'">net9.0</TargetFramework>
+    
+    <!-- Only enable WinForms on Windows -->
+    <UseWindowsForms Condition="'$(OS)' == 'Windows_NT'">true</UseWindowsForms>
+    
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>RateCurveProject</RootNamespace>
   </PropertyGroup>
+  
   <ItemGroup>
     <PackageReference Include="ClosedXML" Version="0.105.0" />
     <PackageReference Include="ConsoleTables" Version="2.7.0" />
     <PackageReference Include="ScottPlot" Version="5.0.18" />
-    <PackageReference Include="ScottPlot.WinForms" Version="5.0.18" />
+    <!-- Only include WinForms package on Windows -->
+    <PackageReference Include="ScottPlot.WinForms" Version="5.0.18" Condition="'$(OS)' == 'Windows_NT'" />
     <PackageReference Include="CsvHelper" Version="30.0.1" />
   </ItemGroup>
 </Project>
