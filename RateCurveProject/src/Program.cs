@@ -41,7 +41,7 @@ public class Program
 
         // 1) Résoudre chemins robustement
         string projectRoot = FindProjectRoot();
-        
+
         // Déterminer le pays (menu interactif si pas d'argument)
         string country = "France";
         if (args.Length > 0)
@@ -56,11 +56,11 @@ public class Program
         else
         {
             // Menu interactif
-            Console.WriteLine("\n🌍 Sélectionnez le marché de taux:");
+            Console.WriteLine("\n Sélectionnez le marché de taux:");
             Console.WriteLine("  [1] France");
             Console.WriteLine("  [2] États-Unis (US)");
             Console.Write("\nVotre choix (1 ou 2): ");
-            
+
             string? choice = Console.ReadLine();
             country = choice?.Trim() switch
             {
@@ -85,12 +85,12 @@ public class Program
             $"data_{country}.xlsx"
         );
 
-        Console.WriteLine($"\n📊 Données chargées depuis: {country}");
+        Console.WriteLine($"\n Données chargées depuis: {country}");
         Console.WriteLine($"Fichier: {dataPath}");
 
         if (!File.Exists(dataPath))
         {
-            Console.Error.WriteLine($"❌ Erreur: Le fichier {dataPath} n'existe pas!");
+            Console.Error.WriteLine($"Erreur: Le fichier {dataPath} n'existe pas!");
             return;
         }
 
@@ -110,6 +110,20 @@ public class Program
         // 3) Bootstrap (unique) de la courbe zéro à partir des instruments
         var bootstrapper = new Bootstrapper();
         var zeroPoints = bootstrapper.BuildZeroCurve(quotes);
+
+        // Afficher les points de la courbe zéro
+        Console.WriteLine("\nPoints de la courbe zéro bootstrappée :");
+        var zeroTable = new ConsoleTable("Maturité (ans)", "Taux Zéro", "Facteur d'Actualisation");
+        foreach (var point in zeroPoints)
+        {
+            double discountFactor = Math.Exp(-point.ZeroRate * point.T);
+            zeroTable.AddRow(
+                point.T.ToString("F2"),
+                point.ZeroRate.ToString("P4"),
+                discountFactor.ToString("F6")
+            );
+        }
+        zeroTable.Write();
 
         // 4) Liste des méthodes d'interpolation à tester
         var methodNames = new[] { "Linear", "CubicSpline", "HaganWest", "SmithWilson" };
