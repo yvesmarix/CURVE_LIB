@@ -1,3 +1,4 @@
+using System.Diagnostics;                    // 👈 Ajouter ceci
 using RateCurveProject.Data;
 using RateCurveProject.Engine;
 using RateCurveProject.Models;
@@ -33,6 +34,32 @@ public class Program
 
         // Place les sorties à la racine du projet (pas dans bin/)
         return Path.Combine(projectRoot, outArg);
+    }
+
+    /// <summary>
+    /// Ouvre un fichier (HTML, etc.) avec l'application par défaut du système.
+    /// </summary>
+    static void OpenInBrowser(string path)
+    {
+        if (!File.Exists(path))
+        {
+            Console.Error.WriteLine($"⚠ Fichier introuvable, impossible d'ouvrir : {path}");
+            return;
+        }
+
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = path,
+                UseShellExecute = true   // laisse l'OS choisir le navigateur / appli
+            };
+            Process.Start(psi);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"⚠ Impossible d'ouvrir {path} : {ex.Message}");
+        }
     }
 
     static void Main(string[] args)
@@ -162,7 +189,14 @@ public class Program
             {
                 exporter.ExportCurve(curve, $"curve_points{suffix}.csv", 0.25, 30.0);
                 exporter.ExportMetrics(metrics, $"metrics{suffix}.csv");
-                exporter.ExportMetricsHtml(metrics, $"metrics{suffix}.html");
+
+                // On garde le nom de fichier dans une variable
+                string metricsHtmlFileName = $"metrics{suffix}.html";
+                exporter.ExportMetricsHtml(metrics, metricsHtmlFileName);
+
+                // Chemin absolu pour ouverture dans le navigateur
+                string metricsHtmlFullPath = Path.Combine(methodDir, metricsHtmlFileName);
+                OpenInBrowser(metricsHtmlFullPath);     // 👈 ouverture auto du metrics.html
             }
             catch (Exception ex)
             {
@@ -182,6 +216,6 @@ public class Program
         }
 
         Console.WriteLine();
-        Console.WriteLine($"✅ Done. Outputs in: {outputDir}/{country}");
+        Console.WriteLine($"Done. Outputs in: {outputDir}/{country}");
     }
 }
