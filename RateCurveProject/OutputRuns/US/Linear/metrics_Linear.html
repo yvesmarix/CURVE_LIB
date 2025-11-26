@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Métriques de Courbe de Taux</title>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .chart-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 20px;
+        }
+        .chart-container h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #667eea;
+            font-weight: 600;
+        }
+        .chart {
+            width: 100%;
+            height: 350px;
+        }
+        .table-container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        thead {
+            background: #f8f9fa;
+            border-bottom: 2px solid #667eea;
+        }
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 13px;
+        }
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+        .metric {
+            font-weight: 500;
+            color: #667eea;
+        }
+        .positive { color: #27ae60; }
+        .negative { color: #e74c3c; }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Métriques de Courbe de Taux</h1>
+            <p>Analyse interactive des taux zéro, facteurs d'actualisation et dérivées</p>
+        </div>
+
+        <div class="charts-grid">
+            <div class="chart-container">
+                <h3>Slope (dZ/dt)</h3>
+                <div id="chartSlope" class="chart"></div>
+            </div>
+            <div class="chart-container">
+                <h3>Convexité (d²Z/dt²)</h3>
+                <div id="chartConvexity" class="chart"></div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Maturité (ans)</th>
+                        <th>Taux Zéro (%)</th>
+                        <th>Discount Factor</th>
+                        <th>Forward (%)</th>
+                        <th>Slope</th>
+                        <th>Convexité</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="metric">0.25</td>
+                        <td class="metric">12.7249</td>
+                        <td>0.968689</td>
+                        <td class="metric">-52.0417</td>
+                        <td class="negative">-2.590660</td>
+                        <td class="negative">-0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">0.50</td>
+                        <td class="metric">6.1295</td>
+                        <td>0.969817</td>
+                        <td class="metric">-16.8589</td>
+                        <td class="negative">-0.459768</td>
+                        <td class="positive">0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">1.00</td>
+                        <td class="metric">3.4471</td>
+                        <td>0.966116</td>
+                        <td class="metric">13.8670</td>
+                        <td class="positive">0.104199</td>
+                        <td class="negative">-0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">2.00</td>
+                        <td class="metric">3.4563</td>
+                        <td>0.933209</td>
+                        <td class="metric">7.2093</td>
+                        <td class="positive">0.018765</td>
+                        <td class="negative">-0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">3.00</td>
+                        <td class="metric">3.4527</td>
+                        <td>0.901603</td>
+                        <td class="metric">6.4084</td>
+                        <td class="positive">0.009852</td>
+                        <td class="positive">0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">5.00</td>
+                        <td class="metric">3.5735</td>
+                        <td>0.836379</td>
+                        <td class="metric">0.8702</td>
+                        <td class="negative">-0.005407</td>
+                        <td class="negative">-0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">7.00</td>
+                        <td class="metric">3.7653</td>
+                        <td>0.768301</td>
+                        <td class="metric">1.2373</td>
+                        <td class="negative">-0.003611</td>
+                        <td class="negative">-0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">10.00</td>
+                        <td class="metric">4.0207</td>
+                        <td>0.668931</td>
+                        <td class="metric">-4.2645</td>
+                        <td class="negative">-0.008285</td>
+                        <td class="positive">0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">15.00</td>
+                        <td class="metric">4.5120</td>
+                        <td>0.508239</td>
+                        <td class="metric">3.9137</td>
+                        <td class="negative">-0.000399</td>
+                        <td class="positive">0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">20.00</td>
+                        <td class="metric">4.7845</td>
+                        <td>0.384080</td>
+                        <td class="metric">2.6866</td>
+                        <td class="negative">-0.001049</td>
+                        <td class="positive">0.000000</td>
+                    </tr>
+                    <tr>
+                        <td class="metric">30.00</td>
+                        <td class="metric">4.7482</td>
+                        <td>0.240638</td>
+                        <td class="metric">4.7482</td>
+                        <td class="positive">0.000000</td>
+                        <td class="positive">0.000000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="footer">
+            <p>Généré le 2025-11-26 21:32:09 | RateCurveProject</p>
+        </div>
+    </div>
+
+    <script>
+        const xs = [0.25,0.5,1,2,3,5,7,10,15,20,30];
+        const slopes = [-2.590660490243937,-0.4597677416825277,0.10419915726378806,0.01876473275327223,0.009852214095190659,-0.005406583883090649,-0.0036114612476309538,-0.008285237688754332,-0.00039889719878616337,-0.0010489563317152284,0];
+        const convexities = [-2.7755575615628914E-11,1.3877787807814457E-11,-2.0816681711721685E-11,-1.3877787807814457E-11,0,-6.938893903907228E-12,-1.3877787807814457E-11,0,0,6.938893903907228E-12,0];
+
+        // Graphique 1: Slope
+        const traceSlope = {
+            x: xs,
+            y: slopes,
+            mode: 'lines+markers',
+            name: 'Slope (dZ/dt)',
+            line: { color: '#e74c3c', width: 2 },
+            marker: { size: 4 }
+        };
+        const layoutSlope = {
+            title: '',
+            xaxis: { title: 'Maturité (années)' },
+            yaxis: { title: 'Slope' },
+            margin: { t: 20, l: 60, r: 60, b: 50 },
+            hovermode: 'x unified'
+        };
+        Plotly.newPlot('chartSlope', [traceSlope], layoutSlope, { responsive: true });
+
+        // Graphique 2: Convexité
+        const traceConvexity = {
+            x: xs,
+            y: convexities,
+            mode: 'lines+markers',
+            name: 'Convexité (d²Z/dt²)',
+            line: { color: '#f39c12', width: 2 },
+            marker: { size: 4 }
+        };
+        const layoutConvexity = {
+            title: '',
+            xaxis: { title: 'Maturité (années)' },
+            yaxis: { title: 'Convexité' },
+            margin: { t: 20, l: 60, r: 60, b: 50 },
+            hovermode: 'x unified'
+        };
+        Plotly.newPlot('chartConvexity', [traceConvexity], layoutConvexity, { responsive: true });
+    </script>
+</body>
+</html>

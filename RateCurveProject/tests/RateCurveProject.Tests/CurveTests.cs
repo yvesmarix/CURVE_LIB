@@ -22,7 +22,6 @@ public class CurveTests
         var interpolator = new LinearInterpolator();
         interpolator.Build(points);
         var curve = new Curve(points, interpolator);
-
         // Act & Assert - Taux zéro
         // Les taux zéro doivent correspondre à l'interpolateur
         Assert.AreEqual(0.02, curve.Zero(1.0), 0.000000000001, "Taux zéro à t=1.0 échoué");

@@ -41,7 +41,36 @@ public class Program
 
         // 1) Résoudre chemins robustement
         string projectRoot = FindProjectRoot();
-        // on ne lit plus la méthode dans les args, on sort TOUS les graphes
+        
+        // Déterminer le pays (menu interactif si pas d'argument)
+        string country = "France";
+        if (args.Length > 0)
+        {
+            country = args[0].ToLower() switch
+            {
+                "us" => "US",
+                "france" => "France",
+                _ => "France"
+            };
+        }
+        else
+        {
+            // Menu interactif
+            Console.WriteLine("\n🌍 Sélectionnez le marché de taux:");
+            Console.WriteLine("  [1] France");
+            Console.WriteLine("  [2] États-Unis (US)");
+            Console.Write("\nVotre choix (1 ou 2): ");
+            
+            string? choice = Console.ReadLine();
+            country = choice?.Trim() switch
+            {
+                "2" or "us" or "US" => "US",
+                "1" or "france" or "france" => "France",
+                _ => "France"
+            };
+        }
+
+        // Déterminer le répertoire de sortie
         string outArg = args.Length > 1 ? args[1] : "OutputRuns";
 
         string outputDir = ResolveOutputDir(outArg, projectRoot);
@@ -53,8 +82,17 @@ public class Program
             projectRoot,
             "src",
             "Samples",
-            "data_france.xlsx"
+            $"data_{country}.xlsx"
         );
+
+        Console.WriteLine($"\n📊 Données chargées depuis: {country}");
+        Console.WriteLine($"Fichier: {dataPath}");
+
+        if (!File.Exists(dataPath))
+        {
+            Console.Error.WriteLine($"❌ Erreur: Le fichier {dataPath} n'existe pas!");
+            return;
+        }
 
         var quotes = loader.LoadInstruments(dataPath);
         Console.WriteLine("Instruments chargés :");
@@ -81,8 +119,9 @@ public class Program
             Console.WriteLine();
             Console.WriteLine($"=== Méthode d'interpolation : {method} ===");
 
-            // Sous-dossier par méthode : OutputRuns/Linear, OutputRuns/CubicSpline, ...
-            string methodDir = Path.Combine(outputDir, method);
+            // Sous-dossier par pays et méthode : OutputRuns/France/Linear, OutputRuns/US/Linear, ...
+            string countryDir = Path.Combine(outputDir, country);
+            string methodDir = Path.Combine(countryDir, method);
             Directory.CreateDirectory(methodDir);
 
             // suffix pour tous les noms de fichiers
@@ -103,10 +142,18 @@ public class Program
             var analyzer = new CurveAnalyzer(curve);
             var metrics = analyzer.ComputeMetrics(new double[] { 0.25, 0.5, 1, 2, 3, 5, 7, 10, 15, 20, 30 });
 
-            // 6) Exports CSV (un fichier par méthode, nom avec suffixe)
+            // 6) Exports CSV & HTML (un fichier par méthode, nom avec suffixe)
             var exporter = new ExportManager(methodDir);
-            exporter.ExportCurve(curve, $"curve_points{suffix}.csv", 0.25, 30.0);
-            exporter.ExportMetrics(metrics, $"metrics{suffix}.csv");
+            try
+            {
+                exporter.ExportCurve(curve, $"curve_points{suffix}.csv", 0.25, 30.0);
+                exporter.ExportMetrics(metrics, $"metrics{suffix}.csv");
+                exporter.ExportMetricsHtml(metrics, $"metrics{suffix}.html");
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Erreur lors de l'export pour {method}: {ex.Message}");
+            }
 
             // 7) Visualisation (PNG + HTML interactif) dans le sous-dossier
             var plotter = new CurvePlotter(methodDir);
@@ -121,6 +168,6 @@ public class Program
         }
 
         Console.WriteLine();
-        Console.WriteLine($"Done. Outputs in: {outputDir}");
+        Console.WriteLine($"✅ Done. Outputs in: {outputDir}/{country}");
     }
 }
